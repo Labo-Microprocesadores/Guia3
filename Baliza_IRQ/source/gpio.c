@@ -107,7 +107,7 @@ void gpioWrite (pin_t pin, bool value)
  * @param irqFun function to call on pin event
  * @return Registration succeed
  */
-static void (*callbacks[5])(void);
+static void (*callbacks[5][32])(void);
 
 bool gpioIRQ (pin_t pin, uint8_t irqMode, pinIrqFun_t irqFun)
 {
@@ -116,8 +116,8 @@ bool gpioIRQ (pin_t pin, uint8_t irqMode, pinIrqFun_t irqFun)
 	ports[port]->PCR[num] |= PORT_PCR_IRQC_MASK;
 	ports[port]->PCR[num] |= PORT_PCR_IRQC(irqMode);
 	NVIC_EnableIRQ(PORTA_IRQn + port);
-	callbacks[port] = irqFun;
-	//NVIC_SetVector(PORTA_IRQn + port, (uint32_t)irqFun);
+	callbacks[port][num] = irqFun;
+
 	return NVIC_GetActive(PORTA_IRQn + port); // not implemented yet
 }
 
@@ -135,25 +135,60 @@ bool PORT_ClearInterruptFlag (pin_t pin)
 
 __ISR__ PORTA_IRQHandler (void)
 {
-	callbacks[0]();
+	int i;
+	for (i = 0; i<32;i++)
+	{
+		if ( callbacks[0][i] && (ports[0]->PCR[i] | PORT_PCR_ISF_MASK) )
+		{
+			callbacks[0][i]();
+		}
+	}
 }
 
 __ISR__ PORTB_IRQHandler (void)
 {
-	callbacks[1]();
+	int i;
+	for (i = 0; i<32;i++)
+	{
+		if ( callbacks[1][i] && (ports[1]->PCR[i] | PORT_PCR_ISF_MASK) )
+		{
+			callbacks[1][i]();
+		}
+	}
 }
 
 __ISR__ PORTC_IRQHandler (void)
 {
-	callbacks[2]();
+	int i;
+	for (i = 0; i<32;i++)
+	{
+		if ( callbacks[2][i] && (ports[2]->PCR[i] | PORT_PCR_ISF_MASK) )
+		{
+			callbacks[2][i]();
+		}
+	}
 }
 
 __ISR__ PORTD_IRQHandler (void)
 {
-	callbacks[3]();
+	int i;
+	for (i = 0; i<32;i++)
+	{
+		if ( callbacks[3][i] && (ports[3]->PCR[i] | PORT_PCR_ISF_MASK) )
+		{
+			callbacks[3][i]();
+		}
+	}
 }
 
 __ISR__ PORTE_IRQHandler (void)
 {
-	callbacks[4]();
+	int i;
+	for (i = 0; i<32;i++)
+	{
+		if ( callbacks[4][i] && (ports[4]->PCR[i] | PORT_PCR_ISF_MASK) )
+		{
+			callbacks[4][i]();
+		}
+	}
 }
